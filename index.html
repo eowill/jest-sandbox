@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini E-commerce // Laboratório de Testes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0e15;
+  --bg-raised:#11161f;
+  --bg-inset:#070a10;
+  --line:#1f2733;
+  --line-soft:#161d28;
+  --text:#e6edf3;
+  --text-dim:#7f8b9c;
+  --text-faint:#4d5867;
+  --green:#3ddc84;
+  --green-dim:#1f4d36;
+  --magenta:#ff3f8e;
+  --magenta-dim:#4d1730;
+  --amber:#ffb454;
+  --amber-dim:#4d3a1a;
+  --cyan:#4fd1ff;
+  --cyan-dim:#173a4d;
+  --mono:'JetBrains Mono', monospace;
+  --disp:'Space Grotesk', sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(circle at 15% 0%, rgba(79,209,255,0.06), transparent 40%),
+    radial-gradient(circle at 85% 100%, rgba(255,63,142,0.06), transparent 40%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--mono);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--green);color:#001a0e;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--bg-inset);}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;}
+a{color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+
+/* ---------- layout ---------- */
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+.sidebar{
+  background:var(--bg-raised);
+  border-right:1px solid var(--line);
+  padding:20px 0 20px 0;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.brand{
+  padding:0 20px 18px 20px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:14px;
+}
+.brand .tag{font-size:10px;letter-spacing:2px;color:var(--green);text-transform:uppercase;}
+.brand h1{
+  font-family:var(--disp);font-size:19px;margin:6px 0 2px;font-weight:700;
+  letter-spacing:-0.02em;
+}
+.brand .sub{font-size:11px;color:var(--text-dim);}
+
+.navgroup-label{
+  font-size:10px;letter-spacing:1.5px;color:var(--text-faint);
+  text-transform:uppercase;padding:0 20px;margin:14px 0 6px;
+}
+nav button.navitem{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  background:none;border:none;color:var(--text-dim);
+  padding:9px 20px;font-size:13px;font-family:var(--mono);
+  border-left:2px solid transparent;
+  transition:background .12s, color .12s, border-color .12s;
+}
+nav button.navitem .num{color:var(--text-faint);font-size:11px;width:18px;flex-shrink:0;}
+nav button.navitem:hover{background:var(--bg-inset);color:var(--text);}
+nav button.navitem.active{
+  color:var(--green);background:var(--bg-inset);
+  border-left-color:var(--green);
+}
+nav button.navitem.active .num{color:var(--green);}
+
+.sidebar-foot{padding:16px 20px 0;margin-top:16px;border-top:1px solid var(--line);}
+.mini-stat{display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin:6px 0;}
+.mini-stat b{color:var(--cyan);}
+.bar{height:4px;border-radius:2px;background:var(--bg-inset);overflow:hidden;margin-top:6px;}
+.bar > span{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));}
+
+main{padding:28px 36px 60px;max-width:1080px;}
+
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin-bottom:26px;flex-wrap:wrap;
+}
+.crumbs{font-size:12px;color:var(--text-faint);}
+.crumbs b{color:var(--text-dim);}
+.toggles{display:flex;gap:8px;}
+.toggle-btn{
+  background:var(--bg-raised);border:1px solid var(--line);color:var(--text-dim);
+  padding:7px 12px;border-radius:6px;font-size:11px;display:flex;align-items:center;gap:6px;
+}
+.toggle-btn .dot{width:7px;height:7px;border-radius:50%;background:var(--text-faint);}
+.toggle-btn.on{color:var(--amber);border-color:var(--amber-dim);background:var(--amber-dim);}
+.toggle-btn.on .dot{background:var(--amber);box-shadow:0 0 6px var(--amber);}
+.toggle-btn.on.prof{color:var(--cyan);border-color:var(--cyan-dim);background:var(--cyan-dim);}
+.toggle-btn.on.prof .dot{background:var(--cyan);box-shadow:0 0 6px var(--cyan);}
+
+h2.pagetitle{
+  font-family:var(--disp);font-size:28px;margin:0 0 4px;letter-spacing:-0.02em;
+}
+p.pagesub{color:var(--text-dim);font-size:13.5px;margin:0 0 26px;max-width:640px;line-height:1.6;}
+
+.panel{
+  background:var(--bg-raised);border:1px solid var(--line);border-radius:10px;
+  padding:20px;margin-bottom:20px;
+}
+.panel h3{
+  font-family:var(--disp);font-size:14px;margin:0 0 14px;color:var(--text);
+  display:flex;align-items:center;gap:8px;
+}
+.panel h3 .ico{color:var(--green);}
+
+/* ---------- demo widgets ---------- */
+.grid-products{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;}
+.pcard{
+  background:var(--bg-inset);border:1px solid var(--line-soft);border-radius:8px;
+  padding:14px;display:flex;flex-direction:column;gap:6px;
+}
+.pcard .cat{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);}
+.pcard .nm{font-size:13.5px;font-weight:600;font-family:var(--disp);}
+.pcard .pr{color:var(--green);font-size:14px;}
+.pcard .st{font-size:11px;color:var(--text-faint);}
+.pcard .actions{display:flex;gap:6px;margin-top:6px;}
+.btn{
+  border:1px solid var(--line);background:var(--bg-raised);color:var(--text);
+  padding:6px 10px;border-radius:6px;font-size:11px;transition:.12s;
+}
+.btn:hover{border-color:var(--green);color:var(--green);}
+.btn.primary{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+.btn.primary:hover{background:var(--green);color:#001a0e;}
+.btn.danger{border-color:var(--magenta-dim);color:var(--magenta);}
+.btn.danger:hover{background:var(--magenta-dim);}
+.btn.fav.active{color:var(--magenta);border-color:var(--magenta);}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+
+.cart-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:13px;
+}
+.cart-row:last-child{border-bottom:none;}
+.cart-total{display:flex;justify-content:space-between;font-size:15px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+.cart-total b{color:var(--green);}
+
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:11px;color:var(--text-dim);margin-bottom:5px;}
+.field input{
+  width:100%;background:var(--bg-inset);border:1px solid var(--line);border-radius:6px;
+  padding:9px 10px;color:var(--text);font-family:var(--mono);font-size:13px;
+}
+.field input:focus{outline:none;border-color:var(--green);}
+.msg{font-size:12px;padding:8px 10px;border-radius:6px;margin-top:10px;display:none;}
+.msg.ok{display:block;background:var(--green-dim);color:var(--green);}
+.msg.err{display:block;background:var(--magenta-dim);color:var(--magenta);}
+
+table.simple{width:100%;border-collapse:collapse;font-size:12.5px;}
+table.simple th{text-align:left;color:var(--text-faint);font-weight:500;padding:6px 8px;border-bottom:1px solid var(--line);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;}
+table.simple td{padding:8px;border-bottom:1px solid var(--line-soft);}
+.badge{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--bg-inset);border:1px solid var(--line);color:var(--text-dim);}
+.badge.ok{color:var(--green);border-color:var(--green-dim);}
+.badge.cancel{color:var(--magenta);border-color:var(--magenta-dim);}
+
+/* ---------- lab function grid ---------- */
+.fn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;}
+.fn-card{
+  background:var(--bg-inset);border:1px solid var(--line-soft);border-radius:8px;
+  padding:14px;text-align:left;color:var(--text);transition:.12s;position:relative;
+}
+.fn-card:hover{border-color:var(--green);transform:translateY(-1px);}
+.fn-card .sig{font-size:12.5px;color:var(--cyan);display:block;margin-bottom:6px;}
+.fn-card .obj{font-size:11.5px;color:var(--text-dim);line-height:1.5;}
+.fn-card .done{
+  position:absolute;top:10px;right:10px;font-size:9px;color:var(--green);
+  border:1px solid var(--green-dim);background:var(--green-dim);padding:2px 6px;border-radius:8px;
+  display:none;
+}
+.fn-card.done .done{display:inline-block;}
+
+/* ---------- modal lab ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(4,6,10,0.78);backdrop-filter:blur(3px);
+  display:none;align-items:flex-start;justify-content:center;z-index:50;
+  padding:40px 20px;overflow-y:auto;
+}
+.overlay.show{display:flex;}
+.modal{
+  background:var(--bg-raised);border:1px solid var(--line);border-radius:12px;
+  width:100%;max-width:760px;overflow:hidden;
+}
+.modal-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 20px;border-bottom:1px solid var(--line);background:var(--bg-inset);
+}
+.modal-head .dots span{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;}
+.modal-head .dots span:nth-child(1){background:var(--magenta);}
+.modal-head .dots span:nth-child(2){background:var(--amber);}
+.modal-head .dots span:nth-child(3){background:var(--green);}
+.modal-head .title{font-size:12px;color:var(--text-dim);}
+.modal-head .close{background:none;border:none;color:var(--text-faint);font-size:16px;}
+.modal-head .close:hover{color:var(--magenta);}
+.modal-body{padding:22px;}
+.modal-body h4{
+  font-family:var(--disp);font-size:13px;color:var(--text-faint);
+  text-transform:uppercase;letter-spacing:1px;margin:18px 0 8px;
+}
+.modal-body h4:first-child{margin-top:0;}
+.modal-body .objetivo{font-size:13.5px;color:var(--text);line-height:1.6;font-style:italic;border-left:2px solid var(--green);padding-left:12px;}
+pre.code{
+  background:var(--bg-inset);border:1px solid var(--line-soft);border-radius:8px;
+  padding:14px;font-size:12.5px;line-height:1.65;overflow-x:auto;color:#cdd9e5;
+}
+pre.code .kw{color:var(--magenta);}
+ul.questions{margin:0;padding-left:18px;font-size:13px;color:var(--text-dim);line-height:1.9;}
+.checklist{list-style:none;margin:0;padding:0;}
+.checklist li{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-dim);padding:4px 0;}
+.checklist input{accent-color:var(--green);width:14px;height:14px;}
+.matchers{display:flex;flex-wrap:wrap;gap:6px;}
+.matchers span{
+  font-size:11px;background:var(--bg-inset);border:1px solid var(--line);
+  padding:4px 9px;border-radius:5px;color:var(--cyan);
+}
+.markdone{margin-top:18px;}
+
+/* ---------- console ---------- */
+.console{
+  background:var(--bg-inset);border:1px solid var(--line);border-radius:8px;overflow:hidden;
+}
+.console-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 12px;background:#0d121b;border-bottom:1px solid var(--line);
+}
+.console-head .lbl{font-size:11px;color:var(--text-faint);letter-spacing:1px;}
+.console-out{
+  height:150px;overflow-y:auto;padding:10px 14px;font-size:12.5px;line-height:1.7;
+}
+.console-out .line{white-space:pre-wrap;word-break:break-word;}
+.console-out .line.cmd{color:var(--text-dim);}
+.console-out .line.cmd::before{content:"lab> ";color:var(--green);}
+.console-out .line.res{color:var(--cyan);}
+.console-out .line.error{color:var(--magenta);}
+.console-input-row{display:flex;border-top:1px solid var(--line);}
+.console-input-row span{padding:10px 0 10px 14px;color:var(--green);font-size:13px;}
+.console-input-row input{
+  flex:1;background:none;border:none;color:var(--text);font-family:var(--mono);
+  padding:10px 14px 10px 6px;font-size:13px;
+}
+.console-input-row input:focus{outline:none;}
+
+/* ---------- challenge mode hides ---------- */
+body.challenge .hide-on-challenge{display:none !important;}
+body.challenge .modal-head .title::after{content:" — modo desafio";color:var(--amber);}
+
+/* ---------- professor panel ---------- */
+.prof-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:13px;}
+.prof-row:last-child{border-bottom:none;}
+.prof-row .nm{color:var(--text);}
+.prof-bar{width:140px;height:6px;background:var(--bg-inset);border-radius:3px;overflow:hidden;}
+.prof-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));}
+
+.scenario-note{font-size:11px;color:var(--text-faint);margin-top:8px;}
+
+footer.foot{margin-top:30px;color:var(--text-faint);font-size:11px;text-align:center;}
+
+@media (max-width:860px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{position:relative;height:auto;}
+  main{padding:20px;}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="tag">jest // sandbox</div>
+      <h1>Mini E-commerce</h1>
+      <div class="sub">Laboratório de Testes</div>
+    </div>
+
+    <div class="navgroup-label">Loja</div>
+    <nav id="navMain"></nav>
+
+    <div class="navgroup-label">Treino</div>
+    <nav>
+      <button class="navitem" data-page="lab"><span class="num">10</span> Laboratório de Testes</button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="mini-stat"><span>Funções disponíveis</span><b id="statTotal">0</b></div>
+      <div class="mini-stat"><span>Funções testadas</span><b id="statDone">0</b></div>
+      <div class="bar"><span id="statBar" style="width:0%"></span></div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div class="crumbs">mini-ecommerce / <b id="crumbCurrent">produtos</b></div>
+      <div class="toggles">
+        <button class="toggle-btn" id="btnChallenge"><span class="dot"></span> Modo Desafio</button>
+        <button class="toggle-btn" id="btnProfessor"><span class="dot"></span> Modo Professor</button>
+      </div>
+    </div>
+
+    <div id="content"></div>
+
+    <footer class="foot">construído para praticar Jest — nenhuma resposta de teste é revelada aqui.</footer>
+  </main>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="title" id="modalTitle">função</div>
+      <button class="close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ======================= ESTADO DA LOJA ======================= */
+
+function gerarCenario(){
+  const catalogos = [
+    [
+      {id:1,nome:"Mouse Gamer RGB",preco:129.9,estoque:14,categoria:"periféricos"},
+      {id:2,nome:"Teclado Mecânico",preco:349.0,estoque:6,categoria:"periféricos"},
+      {id:3,nome:"Monitor 27\" 144Hz",preco:1899.0,estoque:3,categoria:"monitores"},
+      {id:4,nome:"Headset Wireless",preco:459.5,estoque:9,categoria:"áudio"},
+      {id:5,nome:"Webcam Full HD",preco:219.0,estoque:0,categoria:"periféricos"},
+      {id:6,nome:"Cadeira Gamer",preco:1299.9,estoque:4,categoria:"móveis"},
+    ],
+    [
+      {id:1,nome:"Notebook 14\" i5",preco:3899.0,estoque:5,categoria:"computadores"},
+      {id:2,nome:"HD Externo 1TB",preco:289.0,estoque:11,categoria:"armazenamento"},
+      {id:3,nome:"SSD NVMe 500GB",preco:349.0,estoque:8,categoria:"armazenamento"},
+      {id:4,nome:"Memória RAM 16GB",preco:259.0,estoque:0,categoria:"componentes"},
+      {id:5,nome:"Placa de Vídeo 8GB",preco:2599.0,estoque:2,categoria:"componentes"},
+      {id:6,nome:"Fonte 650W",preco:399.0,estoque:7,categoria:"componentes"},
+    ]
+  ];
+  return catalogos[Math.floor(Math.random()*catalogos.length)].map(p=>({...p}));
+}
+
+const DB = {
+  usuarios: [{usuario:"aluno", senha:"123456"}],
+  produtos: gerarCenario(),
+  pedidos: [],
+  cupons: {
+    "BEMVINDO10": {desconto:0.10, validade:"2027-12-31"},
+    "FRETEGRATIS": {desconto:0.05, validade:"2027-12-31"},
+    "EXPIRADO": {desconto:0.20, validade:"2024-01-01"},
+  },
+};
+
+let carrinho = [];
+let favoritos = [];
+let perfil = {nome:"Aluno Teste", email:"aluno@exemplo.com", telefone:"61999990000"};
+
+/* ======================= FUNÇÕES TESTÁVEIS ======================= */
+/* Expostas em window para uso na Área de Experimentos do laboratório */
+
+function fazerLogin(usuario, senha){
+  return new Promise((resolve, reject)=>{
+    if(!usuario || !senha) return reject(new Error("Usuário e senha são obrigatórios."));
+    setTimeout(()=>{
+      const achou = DB.usuarios.find(u=>u.usuario===usuario && u.senha===senha);
+      if(achou) resolve({mensagem:"Login realizado.", usuario: achou.usuario});
+      else reject(new Error("Erro de credenciais."));
+    }, 250);
+  });
+}
+
+function listarProdutos(){ return DB.produtos; }
+function buscarProduto(id){ return DB.produtos.find(p=>p.id===id); }
+function buscarPorCategoria(categoria){ return DB.produtos.filter(p=>p.categoria===categoria); }
+function produtoExiste(id){ return DB.produtos.some(p=>p.id===id); }
+
+function adicionarAoCarrinho(carrinhoAtual, produto){
+  if(!produto || typeof produto.id === "undefined") throw new Error("Produto inválido.");
+  return [...carrinhoAtual, produto];
+}
+function removerDoCarrinho(carrinhoAtual, id){ return carrinhoAtual.filter(p=>p.id!==id); }
+function calcularTotal(carrinhoAtual){ return +carrinhoAtual.reduce((soma,p)=>soma+p.preco,0).toFixed(2); }
+function limparCarrinho(){ return []; }
+
+function adicionarFavorito(favsAtual, id){ return favsAtual.includes(id) ? favsAtual : [...favsAtual, id]; }
+function removerFavorito(favsAtual, id){ return favsAtual.filter(f=>f!==id); }
+function verificarFavorito(favsAtual, id){ return favsAtual.includes(id); }
+
+function cupomValido(codigo){
+  const c = DB.cupons[codigo];
+  if(!c) return false;
+  return new Date(c.validade) >= new Date();
+}
+function aplicarCupom(codigo, total){
+  const c = DB.cupons[codigo];
+  if(!c) throw new Error("Cupom inválido.");
+  if(new Date(c.validade) < new Date()) throw new Error("Cupom expirado.");
+  return +(total * (1 - c.desconto)).toFixed(2);
+}
+
+function verificarEstoque(id){
+  const p = DB.produtos.find(p=>p.id===id);
+  return p ? p.estoque : undefined;
+}
+function reduzirEstoque(id, quantidade){
+  const p = DB.produtos.find(p=>p.id===id);
+  if(!p) throw new Error("Produto não encontrado.");
+  if(p.estoque < quantidade) throw new Error("Sem estoque suficiente.");
+  p.estoque -= quantidade;
+  return p.estoque;
+}
+function aumentarEstoque(id, quantidade){
+  const p = DB.produtos.find(p=>p.id===id);
+  if(!p) throw new Error("Produto não encontrado.");
+  p.estoque += quantidade;
+  return p.estoque;
+}
+
+function atualizarNome(perfilAtual, nome){
+  if(!nome || nome.trim().length < 2) throw new Error("Nome inválido.");
+  return {...perfilAtual, nome};
+}
+function atualizarEmail(perfilAtual, email){
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Email inválido.");
+  return {...perfilAtual, email};
+}
+function atualizarTelefone(perfilAtual, telefone){
+  const limpo = String(telefone).replace(/\D/g,"");
+  if(limpo.length < 10 || limpo.length > 11) throw new Error("Telefone inválido.");
+  return {...perfilAtual, telefone: limpo};
+}
+
+function criarPedido(carrinhoAtual){
+  if(!carrinhoAtual.length) throw new Error("Carrinho vazio.");
+  const pedido = {id: Date.now(), itens:[...carrinhoAtual], total: calcularTotal(carrinhoAtual), status:"pendente"};
+  DB.pedidos.push(pedido);
+  return pedido;
+}
+function cancelarPedido(id){
+  const pedido = DB.pedidos.find(p=>p.id===id);
+  if(!pedido) return undefined;
+  pedido.status = "cancelado";
+  return pedido;
+}
+function buscarPedido(id){ return DB.pedidos.find(p=>p.id===id); }
+
+function calcularVendas(){
+  return +DB.pedidos.filter(p=>p.status!=="cancelado").reduce((s,p)=>s+p.total,0).toFixed(2);
+}
+function produtoMaisVendido(){
+  const contagem = {};
+  DB.pedidos.filter(p=>p.status!=="cancelado").forEach(p=>{
+    p.itens.forEach(item=>{ contagem[item.id] = (contagem[item.id]||0) + 1; });
+  });
+  let melhorId = null, melhorQtd = 0;
+  for(const id in contagem){ if(contagem[id] > melhorQtd){ melhorQtd = contagem[id]; melhorId = +id; } }
+  return melhorId ? buscarProduto(melhorId) : undefined;
+}
+function ticketMedio(){
+  const validos = DB.pedidos.filter(p=>p.status!=="cancelado");
+  if(!validos.length) return 0;
+  return +(calcularVendas() / validos.length).toFixed(2);
+}
+
+[fazerLogin,listarProdutos,buscarProduto,buscarPorCategoria,produtoExiste,adicionarAoCarrinho,
+removerDoCarrinho,calcularTotal,limparCarrinho,adicionarFavorito,removerFavorito,verificarFavorito,
+cupomValido,aplicarCupom,verificarEstoque,reduzirEstoque,aumentarEstoque,atualizarNome,atualizarEmail,
+atualizarTelefone,criarPedido,cancelarPedido,buscarPedido,calcularVendas,produtoMaisVendido,ticketMedio]
+.forEach(fn=>{ window[fn.name] = fn; });
+window.DB = DB;
+window.getCarrinho = ()=>carrinho;
+window.getFavoritos = ()=>favoritos;
+window.getPerfil = ()=>perfil;
+
+/* ======================= REGISTRO DO LABORATÓRIO ======================= */
+
+const LAB = [
+  {id:"fazerLogin", modulo:"login", assinatura:"fazerLogin(usuario, senha)",
+   objetivo:"Garanta que o login só seja concluído com credenciais corretas, e que falhas (campos vazios ou senha errada) sejam tratadas como uma Promise rejeitada.",
+   codigo:`function fazerLogin(usuario, senha) {
+  return new <span class="kw">Promise</span>((resolve, reject) => {
+    if (!usuario || !senha) return reject(new Error("Usuário e senha são obrigatórios."));
+    setTimeout(() => {
+      const achou = usuarios.find(u => u.usuario === usuario && u.senha === senha);
+      if (achou) resolve({ mensagem: "Login realizado.", usuario: achou.usuario });
+      else reject(new Error("Erro de credenciais."));
+    }, 250);
+  });
+}`,
+   perguntas:["A função retorna uma Promise ou um valor direto?","O que acontece quando a senha está vazia?","Como simular tempo assíncrono em um teste (setTimeout)?","Qual a diferença entre testar resolve e reject?"],
+   matchers:["resolves","rejects","toBe","toEqual"]},
+
+  {id:"listarProdutos", modulo:"produtos", assinatura:"listarProdutos()",
+   objetivo:"Confirme que a listagem sempre retorna um array, mesmo quando o catálogo é gerado novamente pelo botão de cenário.",
+   codigo:`function listarProdutos() {
+  return produtos;
+}`,
+   perguntas:["O retorno é sempre um array?","O array pode estar vazio em algum cenário?","Os itens possuem todas as propriedades esperadas (id, nome, preço...)?"],
+   matchers:["toBeInstanceOf","toHaveLength","toEqual","toMatchObject"]},
+
+  {id:"buscarProduto", modulo:"produtos", assinatura:"buscarProduto(id)",
+   objetivo:"Verifique o comportamento da busca tanto para um id existente quanto para um id que não existe no catálogo.",
+   codigo:`function buscarProduto(id) {
+  return produtos.find(p => p.id === id);
+}`,
+   perguntas:["O que a função retorna quando o produto existe?","O que ela retorna quando o produto não existe?","O tipo do retorno muda dependendo do caso?"],
+   matchers:["toEqual","toBeUndefined","toMatchObject"]},
+
+  {id:"buscarPorCategoria", modulo:"produtos", assinatura:"buscarPorCategoria(categoria)",
+   objetivo:"Teste se a filtragem por categoria retorna apenas os produtos corretos, incluindo o caso de uma categoria inexistente.",
+   codigo:`function buscarPorCategoria(categoria) {
+  return produtos.filter(p => p.categoria === categoria);
+}`,
+   perguntas:["O retorno é sempre um array, mesmo sem resultados?","Todos os itens retornados pertencem à categoria pedida?"],
+   matchers:["toHaveLength","toEqual","toContainEqual"]},
+
+  {id:"produtoExiste", modulo:"produtos", assinatura:"produtoExiste(id)",
+   objetivo:"Garanta que a função sempre devolva um booleano, tanto para ids válidos quanto inválidos.",
+   codigo:`function produtoExiste(id) {
+  return produtos.some(p => p.id === id);
+}`,
+   perguntas:["O retorno é estritamente true/false?","Funciona com id undefined ou de tipo diferente (string vs number)?"],
+   matchers:["toBe","toBeTruthy","toBeFalsy"]},
+
+  {id:"adicionarAoCarrinho", modulo:"carrinho", assinatura:"adicionarAoCarrinho(carrinho, produto)",
+   objetivo:"Garanta que o carrinho seja atualizado corretamente após adicionar um produto, sem alterar o array original.",
+   codigo:`function adicionarAoCarrinho(carrinho, produto) {
+  if (!produto || typeof produto.id === "undefined") {
+    throw new Error("Produto inválido.");
+  }
+  return [...carrinho, produto];
+}`,
+   perguntas:["O array original é modificado (mutação) ou um novo array é criado?","O que acontece se passarmos um produto inválido (undefined)?","O tamanho do novo carrinho aumenta em 1?"],
+   matchers:["toContain","toContainEqual","toHaveLength","toThrow"]},
+
+  {id:"removerDoCarrinho", modulo:"carrinho", assinatura:"removerDoCarrinho(carrinho, id)",
+   objetivo:"Verifique se o item correto é removido e que itens com outros ids permanecem intactos.",
+   codigo:`function removerDoCarrinho(carrinho, id) {
+  return carrinho.filter(p => p.id !== id);
+}`,
+   perguntas:["O item removido realmente desaparece do array?","Remover um id que não existe altera o carrinho?"],
+   matchers:["toHaveLength","toEqual","not.toContainEqual"]},
+
+  {id:"calcularTotal", modulo:"carrinho", assinatura:"calcularTotal(carrinho)",
+   objetivo:"Teste o cálculo do valor total para carrinhos com múltiplos itens e para um carrinho vazio.",
+   codigo:`function calcularTotal(carrinho) {
+  return +carrinho.reduce((soma, p) => soma + p.preco, 0).toFixed(2);
+}`,
+   perguntas:["O retorno é sempre um número?","Qual o valor esperado para um carrinho vazio?","Como lidar com arredondamento de casas decimais no teste?"],
+   matchers:["toBe","toBeCloseTo"]},
+
+  {id:"limparCarrinho", modulo:"carrinho", assinatura:"limparCarrinho()",
+   objetivo:"Confirme que a função sempre devolve um array vazio.",
+   codigo:`function limparCarrinho() {
+  return [];
+}`,
+   perguntas:["O retorno é um array?","O array está realmente vazio?"],
+   matchers:["toEqual","toHaveLength"]},
+
+  {id:"adicionarFavorito", modulo:"favoritos", assinatura:"adicionarFavorito(favoritos, id)",
+   objetivo:"Garanta que um produto não seja duplicado se já estiver na lista de favoritos.",
+   codigo:`function adicionarFavorito(favoritos, id) {
+  return favoritos.includes(id) ? favoritos : [...favoritos, id];
+}`,
+   perguntas:["O que acontece ao adicionar o mesmo id duas vezes?","O array original é mutado?"],
+   matchers:["toContain","toHaveLength","toEqual"]},
+
+  {id:"removerFavorito", modulo:"favoritos", assinatura:"removerFavorito(favoritos, id)",
+   objetivo:"Teste a remoção de um favorito existente e de um id que nunca foi favoritado.",
+   codigo:`function removerFavorito(favoritos, id) {
+  return favoritos.filter(f => f !== id);
+}`,
+   perguntas:["O array resultante perde apenas o id indicado?","Remover um id inexistente gera erro ou apenas não altera nada?"],
+   matchers:["not.toContain","toEqual","toHaveLength"]},
+
+  {id:"verificarFavorito", modulo:"favoritos", assinatura:"verificarFavorito(favoritos, id)",
+   objetivo:"Confirme que a verificação retorna um booleano coerente com o conteúdo da lista.",
+   codigo:`function verificarFavorito(favoritos, id) {
+  return favoritos.includes(id);
+}`,
+   perguntas:["O retorno é estritamente booleano?"],
+   matchers:["toBe","toBeTruthy","toBeFalsy"]},
+
+  {id:"cupomValido", modulo:"cupons", assinatura:"cupomValido(codigo)",
+   objetivo:"Teste cupons válidos, inexistentes e expirados — cada um deve produzir um resultado diferente.",
+   codigo:`function cupomValido(codigo) {
+  const c = cupons[codigo];
+  if (!c) return false;
+  return new Date(c.validade) >= new Date();
+}`,
+   perguntas:["O que acontece com um código que não existe no objeto de cupons?","Como simular/controlar a data atual em um teste de expiração?"],
+   matchers:["toBe","toBeTruthy","toBeFalsy"]},
+
+  {id:"aplicarCupom", modulo:"cupons", assinatura:"aplicarCupom(codigo, total)",
+   objetivo:"Garanta que o desconto seja aplicado corretamente, e que cupons inválidos ou expirados lancem um erro com a mensagem certa.",
+   codigo:`function aplicarCupom(codigo, total) {
+  const c = cupons[codigo];
+  if (!c) throw new Error("Cupom inválido.");
+  if (new Date(c.validade) < new Date()) throw new Error("Cupom expirado.");
+  return +(total * (1 - c.desconto)).toFixed(2);
+}`,
+   perguntas:["A função lança exceções em vez de retornar undefined?","O novo preço reflete corretamente a porcentagem de desconto?","Como testar a mensagem exata do erro lançado?"],
+   matchers:["toThrow","toBeCloseTo","toBe"]},
+
+  {id:"verificarEstoque", modulo:"estoque", assinatura:"verificarEstoque(id)",
+   objetivo:"Teste a consulta de estoque para um produto existente e um produto que não existe.",
+   codigo:`function verificarEstoque(id) {
+  const p = produtos.find(p => p.id === id);
+  return p ? p.estoque : undefined;
+}`,
+   perguntas:["O retorno é sempre um número quando o produto existe?","O que a função retorna para um id inexistente?"],
+   matchers:["toBe","toBeUndefined","toBeGreaterThanOrEqual"]},
+
+  {id:"reduzirEstoque", modulo:"estoque", assinatura:"reduzirEstoque(id, quantidade)",
+   objetivo:"Garanta que o estoque diminui corretamente e que uma tentativa de retirar mais do que existe lança erro.",
+   codigo:`function reduzirEstoque(id, quantidade) {
+  const p = produtos.find(p => p.id === id);
+  if (!p) throw new Error("Produto não encontrado.");
+  if (p.estoque < quantidade) throw new Error("Sem estoque suficiente.");
+  p.estoque -= quantidade;
+  return p.estoque;
+}`,
+   perguntas:["Essa função muda o estado interno (mutação)? Isso afeta como o teste deve ser escrito?","O que acontece ao tentar reduzir mais do que o estoque disponível?"],
+   matchers:["toThrow","toBe"]},
+
+  {id:"aumentarEstoque", modulo:"estoque", assinatura:"aumentarEstoque(id, quantidade)",
+   objetivo:"Teste se o estoque aumenta corretamente e se um produto inexistente gera erro.",
+   codigo:`function aumentarEstoque(id, quantidade) {
+  const p = produtos.find(p => p.id === id);
+  if (!p) throw new Error("Produto não encontrado.");
+  p.estoque += quantidade;
+  return p.estoque;
+}`,
+   perguntas:["O valor de retorno reflete a soma correta?","Existe algum limite máximo de estoque a se considerar?"],
+   matchers:["toBe","toThrow"]},
+
+  {id:"atualizarNome", modulo:"perfil", assinatura:"atualizarNome(perfil, nome)",
+   objetivo:"Teste a atualização do nome com dados válidos e com um nome inválido (vazio ou muito curto).",
+   codigo:`function atualizarNome(perfil, nome) {
+  if (!nome || nome.trim().length < 2) throw new Error("Nome inválido.");
+  return { ...perfil, nome };
+}`,
+   perguntas:["O objeto original é mutado ou um novo objeto é criado?","Qual o tamanho mínimo aceito para o nome?"],
+   matchers:["toThrow","toMatchObject","toEqual"]},
+
+  {id:"atualizarEmail", modulo:"perfil", assinatura:"atualizarEmail(perfil, email)",
+   objetivo:"Garanta que e-mails mal formatados sejam rejeitados e e-mails válidos sejam aceitos.",
+   codigo:`function atualizarEmail(perfil, email) {
+  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+    throw new Error("Email inválido.");
+  }
+  return { ...perfil, email };
+}`,
+   perguntas:["Quais formatos de e-mail devem ser considerados inválidos nos testes?","O restante do objeto perfil permanece intacto?"],
+   matchers:["toThrow","toMatchObject"]},
+
+  {id:"atualizarTelefone", modulo:"perfil", assinatura:"atualizarTelefone(perfil, telefone)",
+   objetivo:"Teste números com formatação (parênteses, traços) e números com quantidade incorreta de dígitos.",
+   codigo:`function atualizarTelefone(perfil, telefone) {
+  const limpo = String(telefone).replace(/\\D/g, "");
+  if (limpo.length < 10 || limpo.length > 11) {
+    throw new Error("Telefone inválido.");
+  }
+  return { ...perfil, telefone: limpo };
+}`,
+   perguntas:["A função remove caracteres não numéricos antes de validar?","Quantos dígitos são aceitos como válidos?"],
+   matchers:["toThrow","toMatchObject","toBe"]},
+
+  {id:"criarPedido", modulo:"pedidos", assinatura:"criarPedido(carrinho)",
+   objetivo:"Garanta que um pedido só seja criado com um carrinho não vazio, e que o objeto retornado tenha a estrutura correta.",
+   codigo:`function criarPedido(carrinho) {
+  if (!carrinho.length) throw new Error("Carrinho vazio.");
+  const pedido = {
+    id: Date.now(),
+    itens: [...carrinho],
+    total: calcularTotal(carrinho),
+    status: "pendente",
+  };
+  pedidos.push(pedido);
+  return pedido;
+}`,
+   perguntas:["O que acontece ao tentar criar um pedido com carrinho vazio?","O objeto retornado contém todas as propriedades esperadas?","O status inicial está correto?"],
+   matchers:["toThrow","toMatchObject","toHaveProperty"]},
+
+  {id:"cancelarPedido", modulo:"pedidos", assinatura:"cancelarPedido(id)",
+   objetivo:"Teste o cancelamento de um pedido existente e a tentativa de cancelar um pedido com id inexistente.",
+   codigo:`function cancelarPedido(id) {
+  const pedido = pedidos.find(p => p.id === id);
+  if (!pedido) return undefined;
+  pedido.status = "cancelado";
+  return pedido;
+}`,
+   perguntas:["O status muda corretamente para 'cancelado'?","O que a função retorna quando o pedido não existe?"],
+   matchers:["toBeUndefined","toMatchObject","toBe"]},
+
+  {id:"buscarPedido", modulo:"pedidos", assinatura:"buscarPedido(id)",
+   objetivo:"Verifique a busca de um pedido existente e de um id que não corresponde a nenhum pedido.",
+   codigo:`function buscarPedido(id) {
+  return pedidos.find(p => p.id === id);
+}`,
+   perguntas:["O retorno muda de tipo dependendo do caso (objeto vs undefined)?"],
+   matchers:["toBeUndefined","toMatchObject"]},
+
+  {id:"calcularVendas", modulo:"relatorios", assinatura:"calcularVendas()",
+   objetivo:"Teste se pedidos cancelados são corretamente excluídos do total de vendas.",
+   codigo:`function calcularVendas() {
+  return +pedidos
+    .filter(p => p.status !== "cancelado")
+    .reduce((s, p) => s + p.total, 0)
+    .toFixed(2);
+}`,
+   perguntas:["Pedidos cancelados entram na soma?","O retorno é sempre numérico?"],
+   matchers:["toBe","toBeCloseTo"]},
+
+  {id:"produtoMaisVendido", modulo:"relatorios", assinatura:"produtoMaisVendido()",
+   objetivo:"Garanta que a função identifique corretamente o produto com mais ocorrências entre os pedidos válidos.",
+   codigo:`function produtoMaisVendido() {
+  const contagem = {};
+  pedidos
+    .filter(p => p.status !== "cancelado")
+    .forEach(p => p.itens.forEach(item => {
+      contagem[item.id] = (contagem[item.id] || 0) + 1;
+    }));
+  let melhorId = null, melhorQtd = 0;
+  for (const id in contagem) {
+    if (contagem[id] > melhorQtd) { melhorQtd = contagem[id]; melhorId = +id; }
+  }
+  return melhorId ? buscarProduto(melhorId) : undefined;
+}`,
+   perguntas:["O que a função retorna quando não há nenhum pedido?","Como o teste deve preparar o cenário (pedidos) antes de chamar a função?"],
+   matchers:["toBeUndefined","toMatchObject","toEqual"]},
+
+  {id:"ticketMedio", modulo:"relatorios", assinatura:"ticketMedio()",
+   objetivo:"Teste o cálculo da média de valor por pedido, incluindo o caso de não haver nenhum pedido válido.",
+   codigo:`function ticketMedio() {
+  const validos = pedidos.filter(p => p.status !== "cancelado");
+  if (!validos.length) return 0;
+  return +(calcularVendas() / validos.length).toFixed(2);
+}`,
+   perguntas:["Qual o valor retornado quando não existem pedidos?","O resultado é arredondado corretamente?"],
+   matchers:["toBe","toBeCloseTo"]},
+];
+
+const MODULOS = [
+  {id:"produtos", nome:"Produtos"},
+  {id:"carrinho", nome:"Carrinho"},
+  {id:"login", nome:"Login"},
+  {id:"perfil", nome:"Perfil"},
+  {id:"pedidos", nome:"Pedidos"},
+  {id:"favoritos", nome:"Favoritos"},
+  {id:"cupons", nome:"Cupons"},
+  {id:"estoque", nome:"Estoque"},
+  {id:"relatorios", nome:"Relatórios"},
+];
+
+/* ======================= PROGRESSO (localStorage) ======================= */
+
+const STORAGE_KEY = "lab_jest_progresso_v1";
+function carregarProgresso(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function salvarProgresso(p){ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+let progresso = carregarProgresso();
+
+function atualizarStats(){
+  const total = LAB.length;
+  const done = Object.values(progresso).filter(Boolean).length;
+  document.getElementById("statTotal").textContent = total;
+  document.getElementById("statDone").textContent = done;
+  document.getElementById("statBar").style.width = Math.round((done/total)*100) + "%";
+}
+
+/* ======================= ESTADO DE UI ======================= */
+
+let currentPage = "produtos";
+let challengeMode = false;
+let professorMode = false;
+
+/* ======================= RENDER: SIDEBAR ======================= */
+
+function renderNav(){
+  const nav = document.getElementById("navMain");
+  nav.innerHTML = MODULOS.map((m,i)=>`
+    <button class="navitem" data-page="${m.id}"><span class="num">${String(i+1).padStart(2,"0")}</span> ${m.nome}</button>
+  `).join("");
+}
+
+function setActiveNav(){
+  document.querySelectorAll(".navitem").forEach(b=>{
+    b.classList.toggle("active", b.dataset.page === currentPage);
+  });
+  document.getElementById("crumbCurrent").textContent = currentPage;
+}
+
+/* ======================= RENDER: PÁGINAS ======================= */
+
+function esc(s){ return String(s).replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+
+function fnsDoModulo(mod){ return LAB.filter(f=>f.modulo===mod); }
+
+function labGridHTML(mod){
+  return `
+  <div class="panel hide-on-challenge-keep">
+    <h3><span class="ico">▸</span> Funções deste módulo — abra o laboratório de cada uma</h3>
+    <div class="fn-grid">
+      ${fnsDoModulo(mod).map(f=>`
+        <button class="fn-card ${progresso[f.id] ? "done":""}" data-lab="${f.id}">
+          <span class="done">✓ testado</span>
+          <span class="sig">${esc(f.assinatura)}</span>
+          <span class="obj">${esc(f.objetivo)}</span>
+        </button>
+      `).join("")}
+    </div>
+  </div>`;
+}
+
+function pageProdutos(){
+  return `
+  <h2 class="pagetitle">Produtos</h2>
+  <p class="pagesub">Catálogo da loja. Use "Gerar novo cenário" para embaralhar os dados e forçar testes mais genéricos.</p>
+  <div class="panel">
+    <h3><span class="ico">▸</span> Catálogo (${DB.produtos.length} itens)</h3>
+    <div class="grid-products">
+      ${DB.produtos.map(p=>`
+        <div class="pcard">
+          <span class="cat">${esc(p.categoria)}</span>
+          <span class="nm">${esc(p.nome)}</span>
+          <span class="pr">R$ ${p.preco.toFixed(2)}</span>
+          <span class="st">${p.estoque>0 ? p.estoque+" em estoque" : "sem estoque"}</span>
+          <div class="actions">
+            <button class="btn primary" data-add="${p.id}" ${p.estoque<=0?"disabled":""}>+ carrinho</button>
+            <button class="btn fav ${favoritos.includes(p.id)?"active":""}" data-fav="${p.id}">♥</button>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  </div>
+  ${labGridHTML("produtos")}`;
+}
+
+function pageCarrinho(){
+  const total = calcularTotal(carrinho);
+  return `
+  <h2 class="pagetitle">Carrinho</h2>
+  <p class="pagesub">Adicione produtos pela página Produtos. O carrinho é um caso clássico de testar mutação vs. imutabilidade.</p>
+  <div class="panel">
+    <h3><span class="ico">▸</span> Itens no carrinho (${carrinho.length})</h3>
+    ${carrinho.length===0 ? `<p style="color:var(--text-faint);font-size:13px;">Carrinho vazio.</p>` :
+      carrinho.map((p,idx)=>`
+        <div class="cart-row">
+          <span>${esc(p.nome)}</span>
+          <span style="display:flex;align-items:center;gap:10px;">
+            R$ ${p.preco.toFixed(2)}
+            <button class="btn danger" data-remove-idx="${idx}" data-remove-id="${p.id}">remover</button>
+          </span>
+        </div>`).join("")}
+    <div class="cart-total"><span>Total</span><b>R$ ${total.toFixed(2)}</b></div>
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" id="btnLimparCarrinho">limpar carrinho</button>
+      <button class="btn primary" id="btnFinalizarPedido" ${carrinho.length===0?"disabled":""}>finalizar pedido</button>
+    </div>
+    <div id="msgCarrinho" class="msg"></div>
+  </div>
+  ${labGridHTML("carrinho")}`;
+}
+
+function pageLogin(){
+  return `
+  <h2 class="pagetitle">Login</h2>
+  <p class="pagesub">Use o usuário <b style="color:var(--green)">aluno</b> e a senha <b style="color:var(--green)">123456</b> para um login bem-sucedido — ou teste valores incorretos.</p>
+  <div class="panel" style="max-width:340px;">
+    <h3><span class="ico">▸</span> Acessar conta</h3>
+    <div class="field"><label>usuário</label><input id="loginUser" type="text" placeholder="aluno"></div>
+    <div class="field"><label>senha</label><input id="loginPass" type="password" placeholder="••••••"></div>
+    <button class="btn primary" id="btnLogin">Entrar</button>
+    <div id="msgLogin" class="msg"></div>
+  </div>
+  ${labGridHTML("login")}`;
+}
+
+function pagePerfil(){
+  return `
+  <h2 class="pagetitle">Perfil</h2>
+  <p class="pagesub">Atualize seus dados. Cada campo possui validação própria — bom material para testar exceções.</p>
+  <div class="panel" style="max-width:380px;">
+    <h3><span class="ico">▸</span> Dados pessoais</h3>
+    <div class="field"><label>nome</label><input id="perfilNome" value="${esc(perfil.nome)}"></div>
+    <div class="field"><label>email</label><input id="perfilEmail" value="${esc(perfil.email)}"></div>
+    <div class="field"><label>telefone</label><input id="perfilTelefone" value="${esc(perfil.telefone)}"></div>
+    <button class="btn primary" id="btnSalvarPerfil">salvar alterações</button>
+    <div id="msgPerfil" class="msg"></div>
+  </div>
+  ${labGridHTML("perfil")}`;
+}
+
+function pagePedidos(){
+  return `
+  <h2 class="pagetitle">Pedidos</h2>
+  <p class="pagesub">Pedidos criados a partir do carrinho (página Carrinho → finalizar pedido).</p>
+  <div class="panel">
+    <h3><span class="ico">▸</span> Histórico (${DB.pedidos.length})</h3>
+    ${DB.pedidos.length===0 ? `<p style="color:var(--text-faint);font-size:13px;">Nenhum pedido ainda.</p>` : `
+    <table class="simple">
+      <thead><tr><th>ID</th><th>Itens</th><th>Total</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        ${DB.pedidos.slice().reverse().map(p=>`
+          <tr>
+            <td>${String(p.id).slice(-5)}</td>
+            <td>${p.itens.length}</td>
+            <td>R$ ${p.total.toFixed(2)}</td>
+            <td><span class="badge ${p.status==='cancelado'?'cancel':'ok'}">${p.status}</span></td>
+            <td>${p.status!=='cancelado' ? `<button class="btn danger" data-cancel-pedido="${p.id}">cancelar</button>` : ""}</td>
+          </tr>`).join("")}
+      </tbody>
+    </table>`}
+  </div>
+  ${labGridHTML("pedidos")}`;
+}
+
+function pageFavoritos(){
+  const items = favoritos.map(id=>buscarProduto(id)).filter(Boolean);
+  return `
+  <h2 class="pagetitle">Favoritos</h2>
+  <p class="pagesub">Marque produtos com ♥ na página de Produtos para vê-los aqui.</p>
+  <div class="panel">
+    <h3><span class="ico">▸</span> Lista de favoritos (${items.length})</h3>
+    ${items.length===0 ? `<p style="color:var(--text-faint);font-size:13px;">Nenhum favorito ainda.</p>` :
+      `<div class="grid-products">${items.map(p=>`
+        <div class="pcard">
+          <span class="cat">${esc(p.categoria)}</span>
+          <span class="nm">${esc(p.nome)}</span>
+          <span class="pr">R$ ${p.preco.toFixed(2)}</span>
+          <button class="btn danger" data-fav="${p.id}">remover dos favoritos</button>
+        </div>`).join("")}</div>`}
+  </div>
+  ${labGridHTML("favoritos")}`;
+}
+
+function pageCupons(){
+  return `
+  <h2 class="pagetitle">Cupons</h2>
+  <p class="pagesub">Cupons disponíveis para teste: <b style="color:var(--green)">BEMVINDO10</b>, <b style="color:var(--green)">FRETEGRATIS</b> e <b style="color:var(--magenta)">EXPIRADO</b> (já vencido).</p>
+  <div class="panel" style="max-width:380px;">
+    <h3><span class="ico">▸</span> Aplicar cupom no carrinho</h3>
+    <div class="field"><label>código do cupom</label><input id="cupomCodigo" placeholder="BEMVINDO10"></div>
+    <p style="font-size:12px;color:var(--text-dim);">Total atual do carrinho: R$ ${calcularTotal(carrinho).toFixed(2)}</p>
+    <button class="btn primary" id="btnAplicarCupom">aplicar</button>
+    <div id="msgCupom" class="msg"></div>
+  </div>
+  ${labGridHTML("cupons")}`;
+}
+
+function pageEstoque(){
+  return `
+  <h2 class="pagetitle">Estoque</h2>
+  <p class="pagesub">Ajuste manualmente o estoque de cada produto e observe o comportamento limite (zero, negativo, etc.).</p>
+  <div class="panel">
+    <h3><span class="ico">▸</span> Controle de estoque</h3>
+    <table class="simple">
+      <thead><tr><th>Produto</th><th>Estoque</th><th></th></tr></thead>
+      <tbody>
+        ${DB.produtos.map(p=>`
+          <tr>
+            <td>${esc(p.nome)}</td>
+            <td>${p.estoque}</td>
+            <td style="display:flex;gap:6px;">
+              <button class="btn" data-estoque-down="${p.id}">−1</button>
+              <button class="btn" data-estoque-up="${p.id}">+1</button>
+            </td>
+          </tr>`).join("")}
+      </tbody>
+    </table>
+  </div>
+  ${labGridHTML("estoque")}`;
+}
+
+function pageRelatorios(){
+  const top = produtoMaisVendido();
+  return `
+  <h2 class="pagetitle">Relatórios</h2>
+  <p class="pagesub">Métricas calculadas a partir dos pedidos criados nesta sessão.</p>
+  <div class="panel">
+    <h3><span class="ico">▸</span> Indicadores</h3>
+    <table class="simple">
+      <tbody>
+        <tr><td>Total de vendas</td><td>R$ ${calcularVendas().toFixed(2)}</td></tr>
+        <tr><td>Ticket médio</td><td>R$ ${ticketMedio().toFixed(2)}</td></tr>
+        <tr><td>Produto mais vendido</td><td>${top ? esc(top.nome) : "—"}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  ${labGridHTML("relatorios")}`;
+}
+
+function pageLab(){
+  return `
+  <h2 class="pagetitle">Laboratório de Testes</h2>
+  <p class="pagesub">Todas as funções do sistema, organizadas por módulo. Clique em qualquer card para abrir o objetivo, o código-fonte, perguntas-guia e a área de experimentos.</p>
+  ${MODULOS.map(m=>`
+    <div class="panel">
+      <h3><span class="ico">▸</span> ${m.nome}</h3>
+      <div class="fn-grid">
+        ${fnsDoModulo(m.id).map(f=>`
+          <button class="fn-card ${progresso[f.id] ? "done":""}" data-lab="${f.id}">
+            <span class="done">✓ testado</span>
+            <span class="sig">${esc(f.assinatura)}</span>
+            <span class="obj">${esc(f.objetivo)}</span>
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `).join("")}
+  ${professorMode ? professorPanelHTML() : ""}`;
+}
+
+function professorPanelHTML(){
+  const total = LAB.length;
+  const done = Object.values(progresso).filter(Boolean).length;
+  return `
+  <div class="panel">
+    <h3><span class="ico">▸</span> Modo Professor — progresso local desta máquina</h3>
+    <p style="font-size:12px;color:var(--text-faint);margin-top:-6px;">
+      Como este projeto roda inteiramente no navegador (sem backend), este painel reflete o progresso salvo localmente.
+      Em uma turma real, esses dados viriam agregados de um servidor.
+    </p>
+    ${MODULOS.map(m=>{
+      const fns = fnsDoModulo(m.id);
+      const concl = fns.filter(f=>progresso[f.id]).length;
+      const pct = fns.length ? Math.round((concl/fns.length)*100) : 0;
+      return `<div class="prof-row">
+        <span class="nm">${m.nome}</span>
+        <span style="display:flex;align-items:center;gap:10px;">
+          <span style="color:var(--text-faint);font-size:11px;">${concl}/${fns.length}</span>
+          <span class="prof-bar"><span style="width:${pct}%"></span></span>
+        </span>
+      </div>`;
+    }).join("")}
+    <div class="prof-row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px;">
+      <span class="nm">Total geral</span>
+      <span style="color:var(--cyan);">${done}/${total} (${Math.round((done/total)*100)}%)</span>
+    </div>
+  </div>`;
+}
+
+const PAGES = {
+  produtos: pageProdutos, carrinho: pageCarrinho, login: pageLogin, perfil: pagePerfil,
+  pedidos: pagePedidos, favoritos: pageFavoritos, cupons: pageCupons, estoque: pageEstoque,
+  relatorios: pageRelatorios, lab: pageLab,
+};
+
+function render(){
+  document.getElementById("content").innerHTML = PAGES[currentPage]();
+  setActiveNav();
+  atualizarStats();
+  bindPageEvents();
+}
+
+/* ======================= EVENTOS DE PÁGINA ======================= */
+
+function flashMsg(elId, ok, text){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.className = "msg " + (ok ? "ok":"err");
+  el.textContent = text;
+}
+
+function bindPageEvents(){
+  document.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click", ()=>{
+    const id = +b.dataset.add;
+    const produto = buscarProduto(id);
+    try{
+      carrinho = adicionarAoCarrinho(carrinho, produto);
+      render();
+    }catch(e){ /* silencioso na demo */ }
+  }));
+
+  document.querySelectorAll("[data-fav]").forEach(b=>b.addEventListener("click", ()=>{
+    const id = +b.dataset.fav;
+    favoritos = verificarFavorito(favoritos, id) ? removerFavorito(favoritos, id) : adicionarFavorito(favoritos, id);
+    render();
+  }));
+
+  const remBtns = document.querySelectorAll("[data-remove-id]");
+  remBtns.forEach(b=>b.addEventListener("click", ()=>{
+    carrinho = removerDoCarrinho(carrinho, +b.dataset.removeId);
+    render();
+  }));
+
+  const limpar = document.getElementById("btnLimparCarrinho");
+  if(limpar) limpar.addEventListener("click", ()=>{ carrinho = limparCarrinho(); render(); });
+
+  const finalizar = document.getElementById("btnFinalizarPedido");
+  if(finalizar) finalizar.addEventListener("click", ()=>{
+    try{
+      criarPedido(carrinho);
+      carrinho = limparCarrinho();
+      render();
+      currentPage = "pedidos";
+      render();
+    }catch(e){ flashMsg("msgCarrinho", false, e.message); }
+  });
+
+  document.querySelectorAll("[data-cancel-pedido]").forEach(b=>b.addEventListener("click", ()=>{
+    cancelarPedido(+b.dataset.cancelPedido);
+    render();
+  }));
+
+  const btnLogin = document.getElementById("btnLogin");
+  if(btnLogin) btnLogin.addEventListener("click", ()=>{
+    const u = document.getElementById("loginUser").value;
+    const p = document.getElementById("loginPass").value;
+    fazerLogin(u,p).then(r=>flashMsg("msgLogin", true, r.mensagem))
+                    .catch(e=>flashMsg("msgLogin", false, e.message));
+  });
+
+  const btnSalvarPerfil = document.getElementById("btnSalvarPerfil");
+  if(btnSalvarPerfil) btnSalvarPerfil.addEventListener("click", ()=>{
+    try{
+      let novo = atualizarNome(perfil, document.getElementById("perfilNome").value);
+      novo = atualizarEmail(novo, document.getElementById("perfilEmail").value);
+      novo = atualizarTelefone(novo, document.getElementById("perfilTelefone").value);
+      perfil = novo;
+      flashMsg("msgPerfil", true, "Perfil atualizado.");
+    }catch(e){ flashMsg("msgPerfil", false, e.message); }
+  });
+
+  const btnCupom = document.getElementById("btnAplicarCupom");
+  if(btnCupom) btnCupom.addEventListener("click", ()=>{
+    try{
+      const novo = aplicarCupom(document.getElementById("cupomCodigo").value.trim().toUpperCase(), calcularTotal(carrinho));
+      flashMsg("msgCupom", true, `Cupom aplicado! Novo total: R$ ${novo.toFixed(2)}`);
+    }catch(e){ flashMsg("msgCupom", false, e.message); }
+  });
+
+  document.querySelectorAll("[data-estoque-down]").forEach(b=>b.addEventListener("click", ()=>{
+    try{ reduzirEstoque(+b.dataset.estoqueDown, 1); render(); }catch(e){ /* sem estoque */ }
+  }));
+  document.querySelectorAll("[data-estoque-up]").forEach(b=>b.addEventListener("click", ()=>{
+    aumentarEstoque(+b.dataset.estoqueUp, 1); render();
+  }));
+
+  document.querySelectorAll("[data-lab]").forEach(b=>b.addEventListener("click", ()=> openLab(b.dataset.lab)));
+}
+
+/* ======================= MODAL DE LABORATÓRIO ======================= */
+
+const overlay = document.getElementById("overlay");
+const modalBody = document.getElementById("modalBody");
+const modalTitle = document.getElementById("modalTitle");
+
+function openLab(fnId){
+  const f = LAB.find(x=>x.id===fnId);
+  if(!f) return;
+  modalTitle.textContent = f.assinatura;
+
+  modalBody.innerHTML = `
+    <h4>Objetivo</h4>
+    <p class="objetivo">${esc(f.objetivo)}</p>
+
+    <h4 class="hide-on-challenge">Código da função</h4>
+    <pre class="code hide-on-challenge">${f.codigo}</pre>
+
+    <h4>O que observar</h4>
+    <ul class="questions">${f.perguntas.map(q=>`<li>${esc(q)}</li>`).join("")}</ul>
+
+    <h4>Planejamento</h4>
+    <ul class="checklist">
+      ${["Entendi a função","Descobri o retorno","Escolhi matcher","Executei Jest","Corrigi falhas"].map((c,i)=>`
+        <li><input type="checkbox" id="chk_${f.id}_${i}"> <label for="chk_${f.id}_${i}">${c}</label></li>
+      `).join("")}
+    </ul>
+
+    <h4>Matchers sugeridos <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:0;">(decida qual usar — nenhuma resposta é indicada)</span></h4>
+    <div class="matchers">${["toBe","toEqual","toContain","toHaveLength","toBeTruthy","toBeFalsy","toThrow","rejects","resolves","toBeUndefined","toBeNull","toMatchObject"].map(m=>`<span>${m}</span>`).join("")}</div>
+
+    <h4>Área de Experimentos</h4>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:-2px;">Chame a função manualmente antes de escrever o teste. Exemplo: <code style="color:var(--cyan)">${exemploChamada(f)}</code></p>
+    <div class="console">
+      <div class="console-head"><span class="lbl">CONSOLE</span><button class="btn" id="btnLimparConsole" style="padding:3px 8px;">limpar</button></div>
+      <div class="console-out" id="consoleOut"></div>
+      <div class="console-input-row">
+        <span>›</span>
+        <input id="consoleIn" placeholder="${esc(exemploChamada(f))}" autocomplete="off">
+      </div>
+    </div>
+
+    <label class="markdone" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim);">
+      <input type="checkbox" id="markDone" ${progresso[f.id] ? "checked":""}> marquei este teste como concluído
+    </label>
+  `;
+
+  overlay.classList.add("show");
+
+  const consoleOut = document.getElementById("consoleOut");
+  const consoleIn = document.getElementById("consoleIn");
+
+  function printLine(text, cls){
+    const div = document.createElement("div");
+    div.className = "line " + cls;
+    div.textContent = text;
+    consoleOut.appendChild(div);
+    consoleOut.scrollTop = consoleOut.scrollHeight;
+  }
+
+  consoleIn.addEventListener("keydown", e=>{
+    if(e.key !== "Enter") return;
+    const cmd = consoleIn.value.trim();
+    if(!cmd) return;
+    printLine(cmd, "cmd");
+    try{
+      const resultado = eval(cmd);
+      if(resultado instanceof Promise){
+        resultado.then(r=>printLine("→ " + JSON.stringify(r), "res"))
+                  .catch(err=>printLine("✕ " + err.message, "error"));
+      } else {
+        printLine("→ " + JSON.stringify(resultado), "res");
+      }
+    }catch(err){
+      printLine("✕ " + err.message, "error");
+    }
+    consoleIn.value = "";
+  });
+
+  document.getElementById("btnLimparConsole").addEventListener("click", ()=>{ consoleOut.innerHTML=""; });
+
+  document.getElementById("markDone").addEventListener("change", e=>{
+    progresso[f.id] = e.target.checked;
+    salvarProgresso(progresso);
+    atualizarStats();
+  });
+}
+
+function exemploChamada(f){
+  const exemplos = {
+    fazerLogin:`fazerLogin("aluno","123456")`,
+    listarProdutos:`listarProdutos()`,
+    buscarProduto:`buscarProduto(1)`,
+    buscarPorCategoria:`buscarPorCategoria("periféricos")`,
+    produtoExiste:`produtoExiste(1)`,
+    adicionarAoCarrinho:`adicionarAoCarrinho(getCarrinho(), buscarProduto(1))`,
+    removerDoCarrinho:`removerDoCarrinho(getCarrinho(), 1)`,
+    calcularTotal:`calcularTotal(getCarrinho())`,
+    limparCarrinho:`limparCarrinho()`,
+    adicionarFavorito:`adicionarFavorito(getFavoritos(), 1)`,
+    removerFavorito:`removerFavorito(getFavoritos(), 1)`,
+    verificarFavorito:`verificarFavorito(getFavoritos(), 1)`,
+    cupomValido:`cupomValido("BEMVINDO10")`,
+    aplicarCupom:`aplicarCupom("BEMVINDO10", 100)`,
+    verificarEstoque:`verificarEstoque(1)`,
+    reduzirEstoque:`reduzirEstoque(1, 1)`,
+    aumentarEstoque:`aumentarEstoque(1, 1)`,
+    atualizarNome:`atualizarNome(getPerfil(), "Novo Nome")`,
+    atualizarEmail:`atualizarEmail(getPerfil(), "novo@email.com")`,
+    atualizarTelefone:`atualizarTelefone(getPerfil(), "61999998888")`,
+    criarPedido:`criarPedido(getCarrinho())`,
+    cancelarPedido:`cancelarPedido(123)`,
+    buscarPedido:`buscarPedido(123)`,
+    calcularVendas:`calcularVendas()`,
+    produtoMaisVendido:`produtoMaisVendido()`,
+    ticketMedio:`ticketMedio()`,
+  };
+  return exemplos[f.id] || `${f.id}()`;
+}
+
+document.getElementById("modalClose").addEventListener("click", closeLab);
+overlay.addEventListener("click", e=>{ if(e.target===overlay) closeLab(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeLab(); });
+function closeLab(){
+  overlay.classList.remove("show");
+  render(); // atualiza cards "testado" e stats
+}
+
+/* ======================= TOGGLES ======================= */
+
+document.getElementById("btnChallenge").addEventListener("click", ()=>{
+  challengeMode = !challengeMode;
+  document.body.classList.toggle("challenge", challengeMode);
+  document.getElementById("btnChallenge").classList.toggle("on", challengeMode);
+});
+
+document.getElementById("btnProfessor").addEventListener("click", ()=>{
+  professorMode = !professorMode;
+  document.getElementById("btnProfessor").classList.toggle("on", professorMode);
+  document.getElementById("btnProfessor").classList.toggle("prof", professorMode);
+  render();
+});
+
+/* ======================= NAVEGAÇÃO + CENÁRIO ======================= */
+
+document.addEventListener("click", e=>{
+  const navBtn = e.target.closest(".navitem");
+  if(navBtn){
+    currentPage = navBtn.dataset.page;
+    render();
+  }
+});
+
+/* botão de gerar novo cenário fica fixo dentro da página Produtos via delegação extra */
+document.getElementById("content").addEventListener("click", e=>{
+  if(e.target.id === "btnGerarCenario"){
+    DB.produtos = gerarCenario();
+    carrinho = [];
+    favoritos = [];
+    render();
+  }
+});
+
+/* adiciona o botão de cenário no topo da página de produtos */
+const origPageProdutos = pageProdutos;
+PAGES.produtos = function(){
+  return origPageProdutos().replace(
+    `<h2 class="pagetitle">Produtos</h2>`,
+    `<h2 class="pagetitle">Produtos</h2><div style="margin:-14px 0 18px;"><button class="btn" id="btnGerarCenario">↻ gerar novo cenário</button> <span class="scenario-note">embaralha o catálogo — bom para evitar testes "hardcoded"</span></div>`
+  );
+};
+
+/* ======================= INIT ======================= */
+
+renderNav();
+render();
+
+})();
+</script>
+</body>
+</html>
